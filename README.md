@@ -4,8 +4,9 @@ This project is a pytorch implementation for the MMI-anti model described in [A 
 ## Reference <br />
 This code is based on [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) and [word_language_model](https://github.com/pytorch/examples/tree/master/word_language_model)
 
-## Demo <br />
-For running example code
+## Quickstart <br />
+
+### Step1: Preprocess the data <br />
 ```
 python glove_filter.py
 ```
