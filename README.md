@@ -22,3 +22,25 @@ After running the preprocessing, the following files are generated in `data/` fo
 * `dialogue.train.1.pt`: serialized PyTorch file containing training data
 * `dialogue.valid.1.pt`: serialized PyTorch file containing validation data
 * `dialogue.vocab.pt`: serialized PyTorch file containing vocabulary data, which will be used in the training process of language model.
+
+### Step2: Train a language model <br />
+
+In this step, we will train a language model based on the responses for the seq2seq model (example data `data/*.vi`). You can also train a language model on any other datasets. 
+
+#### step2.1: Preprocess the data <br />
+
+```
+cd lm/tool/
+python preprocess.py
+```
+
+In this step, we will responses for the seq2seq model (example data `data/*.vi`) will be processed into parallel data for the language model. 
+
+After running the preprocessing, the following files are generated in `lm/data/` folder:
+
+* `train.en`
+* `train.de`
+* `dev.en`
+* `dev.de`
+
+### Step3: Train a language model <br />
