@@ -47,6 +47,6 @@ After running the preprocessing, the following files are generated in `lm/data/`
 * `dev.en`
 * `dev.de`
 
-For example, the response `they just want a story` in file `data/train.vi` will be preprocessed in to `<s> they just want a story` in file `lm/data/train.en` and `they just want a story </s>` in file `lm/data/train.de`.
+For example, the response `"they just want a story"` in file `data/train.vi` will be preprocessed in to `"<s> they just want a story"` in file `lm/data/train.en` and `"they just want a story </s>"` in file `lm/data/train.de`.
 
 ### Step3: Train a language model <br />
