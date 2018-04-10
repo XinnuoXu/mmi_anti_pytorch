@@ -25,16 +25,20 @@ After running the preprocessing, the following files are generated in `data/` fo
 
 ### Step2: Train a language model <br />
 
-In this step, we will train a language model based on the responses for the seq2seq model (example data `data/*.vi`). You can also train a language model on any other datasets. 
-
-#### step2.1: Preprocess the data <br />
-
 ```
 cd lm/tool/
+```
+
+In this step, we will train a language model based on the responses for the seq2seq model (example data `data/*.vi`). You can also train a language model on any other datasets. 
+
+#### step2.1: Preprocess the data <br /> 
+
+```
 python preprocess.py
 ```
 
-In this step, we will responses for the seq2seq model (example data `data/*.vi`) will be processed into parallel data for the language model. 
+These preprocessing will turn all responses for the seq2seq model (example data `data/*.vi`) into parallel data for the language model. 
+
 
 After running the preprocessing, the following files are generated in `lm/data/` folder:
 
