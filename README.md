@@ -93,3 +93,9 @@ python translate.py -model model_name
 ```
 
 The generation results will be saved in file `pred.txt`.
+
+### Step5: Evaluate the diversity? <br />
+
+```
+cat pred.txt | python diversity.py
+```
