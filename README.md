@@ -16,5 +16,9 @@ We will be working with some example data in `data/` folder. The data consists o
 * `train.vi`
 * `dev.en`
 * `dev.vi`
-* `test.en`
-* `test.vi`
+
+After running the preprocessing, the following files are generated in `data/` folder:
+
+* `dialogue.train.1.pt`: serialized PyTorch file containing training data
+* `dialogue.valid.1.pt`: serialized PyTorch file containing validation data
+* `dialogue.vocab.pt`: serialized PyTorch file containing vocabulary data, which will be used in the training process of language model.
