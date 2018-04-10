@@ -29,7 +29,7 @@ After running the preprocessing, the following files are generated in `data/` fo
 cd lm/tool/
 ```
 
-In this step, we will train a language model based on the responses for the seq2seq model (example data `data/*.vi`). Since this language model will be used in the response generation model, it will share the dictionary (`data/*.vocab.pt`) generated in `Step1`.
+In this step, we will train a language model based on the responses for the MMI-anti model (example data `data/*.vi`). Since this language model will be used in the MMI-anti model, it will share the dictionary (`data/*.vocab.pt`) generated in `Step1`.
 
 #### Step2.1: Preprocess the data <br /> 
 
@@ -37,7 +37,7 @@ In this step, we will train a language model based on the responses for the seq2
 python preprocess.py
 ```
 
-These preprocessing will turn all responses for the seq2seq model (example data `data/*.vi`) into parallel data for the language model. 
+These preprocessing will turn all responses for the MMI-anti model (example data `data/*.vi`) into parallel data for the language model. 
 
 
 After running the preprocessing, the following files are generated in `lm/data/` folder:
@@ -71,11 +71,25 @@ if not torch.cuda.is_available() and self.device is None:
 python generate.py
 ```
 
-This tool will generate 1000 utterances randomly using the language model `lm/model.pt` and store them into file `lm/generated.txt`.
+This tool will generate 1000 utterances randomly using the language model `lm/model.pt` and save them into file `lm/generated.txt`.
 
 
-#### Step2.4: Go back to our response generation model <br />
+#### Step2.4: Go back to our MMI-anti model <br />
 
 ```
 cd ../
 ```
+
+### Step3: Train a MMI-anti model <br />
+
+```
+python train.py
+```
+
+### Step4: Generate <br />
+
+```
+python translate.py -model model_name
+```
+
+The generation results will be saved in file `pred.txt`.
