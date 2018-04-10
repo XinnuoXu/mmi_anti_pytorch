@@ -31,7 +31,7 @@ cd lm/tool/
 
 In this step, we will train a language model based on the responses for the seq2seq model (example data `data/*.vi`). You can also train a language model on any other datasets. 
 
-#### step2.1: Preprocess the data <br /> 
+#### Step2.1: Preprocess the data <br /> 
 
 ```
 python preprocess.py
@@ -46,5 +46,7 @@ After running the preprocessing, the following files are generated in `lm/data/`
 * `train.de`
 * `dev.en`
 * `dev.de`
+
+For example, the response `they just want a story` in file `data/train.vi` will be preprocessed in to `<s> they just want a story` in file `lm/data/train.en` and `they just want a story </s>` in file `lm/data/train.de`.
 
 ### Step3: Train a language model <br />
