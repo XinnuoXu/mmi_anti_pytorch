@@ -49,4 +49,18 @@ After running the preprocessing, the following files are generated in `lm/data/`
 
 For example, the response `"they just want a story"` in file `data/train.vi` will be preprocessed in to `"<s> they just want a story"` in file `lm/data/train.en` and `"they just want a story </s>"` in file `lm/data/train.de`.
 
-### Step3: Train a language model <br />
+#### Step2.2: Train a language model <br />
+
+```
+cd ..
+python lm.py
+```
+
+This train command will save the language model to `lm/model.pt`.
+
+To run this code on the CPU, you need to update your pytorch to any version after `24th Feb 2018` and make sure that this piece of code can be found in your `torchtext/data/iterator.py`:
+
+```
+if not torch.cuda.is_available() and self.device is None:
+  self.device = -1
+```
