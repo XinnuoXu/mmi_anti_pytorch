@@ -8,5 +8,11 @@ This code is based on [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) and [w
 
 ### Step1: Preprocess the data <br />
 ```
-python glove_filter.py
+python preprocess.py
 ```
+We will be working with some example data in `data/` folder.
+
+* `src-train.txt`
+* `tgt-train.txt`
+* `src-val.txt`
+* `tgt-val.txt`
