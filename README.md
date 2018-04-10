@@ -10,9 +10,11 @@ This code is based on [OpenNMT-py](https://github.com/OpenNMT/OpenNMT-py) and [w
 ```
 python preprocess.py
 ```
-We will be working with some example data in `data/` folder.
+We will be working with some example data in `data/` folder. The data consists of parallel dialogue context (`.en`) and its response (`.vi`) data containing one sentence per line with tokens separated by a space:
 
-* `src-train.txt`
-* `tgt-train.txt`
-* `src-val.txt`
-* `tgt-val.txt`
+* `train.en`
+* `train.vi`
+* `dev.en`
+* `dev.vi`
+* `test.en`
+* `test.vi`
