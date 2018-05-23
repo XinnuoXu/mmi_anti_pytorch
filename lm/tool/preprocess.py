@@ -18,6 +18,9 @@ def one_file(outfile, infile):
 
 if __name__ == '__main__':
 	import sys
+	import os
+	if not os.path.exists("../data"):
+		os.system("mkdir ../data")
 	one_file("train", "train.vi")
 	one_file("test", "test.vi")
 	one_file("valid", "dev.vi")
