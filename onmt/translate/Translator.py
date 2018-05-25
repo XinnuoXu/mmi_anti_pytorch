@@ -224,7 +224,12 @@ class Translator(object):
 		score.append(scores[i])
 	    if self.mmi:
 		# MMI
-		# Considering sentence length
+		if len(b.ended_sentences) == 0:
+		    for i, (times, k) in enumerate(ks[:n_best]):
+			hyp, att = b.get_hyp(times, k)
+			b.ended_sentences.append(hyp)
+			b.ended_sentences_attn.append(att)
+			b.ended_sentences_scores.append(scores[i])
 		for i in range(0, len(b.ended_sentences)):
 		    b.ended_sentences_scores[i] += self.mmi_gamma * len(b.ended_sentences[i])
 		    #print "QQQQ\t" + " ".join(self.id2w(b.ended_sentences[i])), b.ended_sentences_scores[i], b.ended_sentences_seq_scores[i], b.ended_sentences_lm_scores[i]
