@@ -123,27 +123,27 @@ def evaluate(data_source):
     batch_counter = 0
     samples_num = len(data_source.examples)
     data_iter = data.BucketIterator(dataset=data_source, batch_size=eval_batch_size,
-	sort_key=lambda x: data.interleave_keys(len(x.src), len(x.trg)))
+        sort_key=lambda x: data.interleave_keys(len(x.src), len(x.trg)))
 
     while(eval_batch_size * batch_counter < samples_num):
-	batch = next(iter(data_iter))
-	source = batch.src
-	targets = batch.trg.view(-1)
+        batch = next(iter(data_iter))
+        source = batch.src
+        targets = batch.trg.view(-1)
         output, hidden = model(source, hidden)
         output_flat = output.view(-1, ntokens)
-	ss = []; s = 0; sseq = []
-	tt = targets.data.cpu().numpy()
-	for i in range(0, eval_batch_size):
-	    del sseq[:]
-	    for j in range(i, len(output_flat), eval_batch_size):
-	    	if not tt[j] == 1:
-		    sseq.append(tt[j])
-	            s += output_flat[j][tt[j]]
-	    ss.append(s)
-	    s = 0
+        ss = []; s = 0; sseq = []
+        tt = targets.data.cpu().numpy()
+        for i in range(0, eval_batch_size):
+            del sseq[:]
+            for j in range(i, len(output_flat), eval_batch_size):
+                if not tt[j] == 1:
+                    sseq.append(tt[j])
+                    s += output_flat[j][tt[j]]
+            ss.append(s)
+            s = 0
         total_loss += len(source) * criterion(output_flat, targets).data
         hidden = repackage_hidden(hidden)
-	batch_counter += 1
+        batch_counter += 1
 
     return total_loss[0] / len(data_source)
 
@@ -152,7 +152,7 @@ def train():
     model.train()
     hidden = model.init_hidden(args.batch_size)
     train_iter = data.BucketIterator(dataset=train_data, batch_size=args.batch_size, 
-	sort_key=lambda x: data.interleave_keys(len(x.src), len(x.trg)))
+        sort_key=lambda x: data.interleave_keys(len(x.src), len(x.trg)))
     lr = args.lr
     best_val_loss = None
 
@@ -164,9 +164,9 @@ def train():
     samples_num = len(train_data.examples)
 
     while(epoch < args.epochs):
-	batch = next(iter(train_iter))
-	source = batch.src
-	targets = batch.trg.view(-1)
+        batch = next(iter(train_iter))
+        source = batch.src
+        targets = batch.trg.view(-1)
 
         # Starting each batch, we detach the hidden state from how it was previously produced.
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
@@ -194,10 +194,10 @@ def train():
             total_loss = 0
             start_time = time.time()
 
-	# Manully update epoch & batch states
-	if args.batch_size * batch_counter > samples_num:
-	    epoch += 1
-	    val_loss = evaluate(val_data)
+        # Manully update epoch & batch states
+        if args.batch_size * batch_counter > samples_num:
+            epoch += 1
+            val_loss = evaluate(val_data)
             print('-' * 89)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
                 'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
@@ -211,9 +211,9 @@ def train():
             else:
                 # Anneal the learning rate if no improvement has been seen in the validation dataset.
                 lr /= 4.0
-	    epoch_start_time = time.time()
-	    batch_counter = 0
-	batch_counter += 1
+            epoch_start_time = time.time()
+            batch_counter = 0
+        batch_counter += 1
 
 
 # At any point you can hit Ctrl + C to break out of training early.

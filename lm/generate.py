@@ -68,7 +68,7 @@ with open(args.outf, 'w') as outf:
         word_weights = output.squeeze().data.div(args.temperature).exp().cpu()
         word_idx = torch.multinomial(word_weights, 1)[0]
         input.data.fill_(word_idx)
-	word = v.itos[word_idx]
+        word = v.itos[word_idx]
 
         outf.write(word + ('\n' if i % 20 == 19 else ' '))
 

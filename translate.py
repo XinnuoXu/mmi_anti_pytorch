@@ -68,8 +68,8 @@ def main():
     # Load lm_model
     lm_model = None
     if opt.mmi and opt.mmi_model != "":
-    	with open(opt.mmi_model, 'rb') as f:
-	    lm_model = torch.load(f)
+        with open(opt.mmi_model, 'rb') as f:
+        lm_model = torch.load(f)
 
     # File to write sentences to.
     out_file = codecs.open(opt.output, 'w', 'utf-8')
@@ -101,10 +101,10 @@ def main():
                                            copy_attn=model_opt.copy_attn,
                                            cuda=opt.cuda,
                                            beam_trace=opt.dump_beam != "",
-					   mmi=opt.mmi,
-					   mmi_g=opt.mmi_g,
-					   mmi_lambda=opt.mmi_lambda,
-					   mmi_gamma=opt.mmi_gamma,
+                                           mmi=opt.mmi,
+                                           mmi_g=opt.mmi_g,
+                                           mmi_lambda=opt.mmi_lambda,
+                                           mmi_gamma=opt.mmi_gamma,
                                            min_length=opt.min_length)
     builder = onmt.translate.TranslationBuilder(
         data, translator.fields,
@@ -126,7 +126,7 @@ def main():
                 gold_score_total += trans.gold_score
                 gold_words_total += len(trans.gold_sent)
 
-	    # nBest list
+            # nBest list
             n_best_preds = [" ".join(pred)
                             for pred in trans.pred_sents[:opt.n_best]]
 

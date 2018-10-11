@@ -40,12 +40,12 @@ class Translator(object):
         self.beam_size = beam_size
         self.cuda = cuda
         self.min_length = min_length
-	self.mmi = mmi
-	self.mmi_g = mmi_g
-	self.mmi_lambda = mmi_lambda
-	self.mmi_gamma = mmi_gamma
-	self.lm_model = lm_model
-	self.tt = torch.cuda if self.cuda else torch
+        self.mmi = mmi
+        self.mmi_g = mmi_g
+        self.mmi_lambda = mmi_lambda
+        self.mmi_gamma = mmi_gamma
+        self.lm_model = lm_model
+        self.tt = torch.cuda if self.cuda else torch
 
         # for debugging
         self.beam_accum = None
@@ -57,17 +57,17 @@ class Translator(object):
                 "log_probs": []}
 
     def id2w(self, pred):
-	vocab = self.fields["tgt"].vocab
-	tokens = []
-	for tok in pred:
-	    if tok < len(vocab):
-		tokens.append(vocab.itos[tok])
-	    else:
-		tokens.append(src_vocab.itos[tok - len(vocab)])
-	    if tokens[-1] == onmt.io.EOS_WORD:
-		tokens = tokens[:-1]
-		break
-	return tokens
+        vocab = self.fields["tgt"].vocab
+        tokens = []
+        for tok in pred:
+            if tok < len(vocab):
+                tokens.append(vocab.itos[tok])
+            else:
+                tokens.append(src_vocab.itos[tok - len(vocab)])
+            if tokens[-1] == onmt.io.EOS_WORD:
+                tokens = tokens[:-1]
+                break
+        return tokens
 
     def translate_batch(self, batch, data):
         """
@@ -174,30 +174,30 @@ class Translator(object):
                     batch, self.fields["tgt"].vocab, data.src_vocabs)
                 # beam x tgt_vocab
                 out = out.log()
-	
-	    if self.mmi and self.lm_model != None:
-	    	# MMI
-	        ntokens = len(self.fields["tgt"].vocab.itos)
-		for j, b in enumerate(beam):
-		    cur_seq_candidates = b.get_current_seq()
-		    # cur_seq_candidates: time_step * beam_size
-		    if len(cur_seq_candidates) > 0 and len(cur_seq_candidates) < self.mmi_g:
-		    	tmp_data = Variable(torch.stack(cur_seq_candidates, 0))
-			hidden = self.lm_model.init_hidden(tmp_data.size(1))
-			output, hidden = self.lm_model(tmp_data, hidden)
-			output_flat = torch.nn.functional.log_softmax(output.view(-1, ntokens), 0)
-			mmi_lm_score = output_flat[-beam_size:]
-		    else:
-		        mmi_lm_score = Variable(self.tt.FloatTensor(beam_size, ntokens).zero_())
-		    mmi_seq_score = Variable(out[:, j])
-		    mmi_score = mmi_seq_score - self.mmi_lambda * mmi_lm_score
+
+            if self.mmi and self.lm_model != None:
+                # MMI
+                ntokens = len(self.fields["tgt"].vocab.itos)
+                for j, b in enumerate(beam):
+                    cur_seq_candidates = b.get_current_seq()
+                    # cur_seq_candidates: time_step * beam_size
+                    if len(cur_seq_candidates) > 0 and len(cur_seq_candidates) < self.mmi_g:
+                        tmp_data = Variable(torch.stack(cur_seq_candidates, 0))
+                        hidden = self.lm_model.init_hidden(tmp_data.size(1))
+                        output, hidden = self.lm_model(tmp_data, hidden)
+                        output_flat = torch.nn.functional.log_softmax(output.view(-1, ntokens), 0)
+                        mmi_lm_score = output_flat[-beam_size:]
+                    else:
+                        mmi_lm_score = Variable(self.tt.FloatTensor(beam_size, ntokens).zero_())
+                    mmi_seq_score = Variable(out[:, j])
+                    mmi_score = mmi_seq_score - self.mmi_lambda * mmi_lm_score
                     b.advance(mmi_score.data, unbottle(attn["std"]).data[:, j, :context_lengths[j]], 
-			self.mmi, mmi_seq_score.data, mmi_lm_score.data)
+                        self.mmi, mmi_seq_score.data, mmi_lm_score.data)
                     dec_states.beam_update(j, b.get_current_origin(), beam_size)
-	
-	    else:
-            	# (c) Advance each beam.
-            	for j, b in enumerate(beam):
+
+            else:
+                # (c) Advance each beam.
+                for j, b in enumerate(beam):
                     b.advance(out[:, j], unbottle(attn["std"]).data[:, j, :context_lengths[j]])
                     dec_states.beam_update(j, b.get_current_origin(), beam_size)
 
@@ -221,28 +221,28 @@ class Translator(object):
                 hyp, att = b.get_hyp(times, k)
                 hyps.append(hyp)
                 attn.append(att)
-		score.append(scores[i])
-	    if self.mmi:
-		# MMI
-		if len(b.ended_sentences) == 0:
-		    for i, (times, k) in enumerate(ks[:n_best]):
-			hyp, att = b.get_hyp(times, k)
-			b.ended_sentences.append(hyp)
-			b.ended_sentences_attn.append(att)
-			b.ended_sentences_scores.append(scores[i])
-		for i in range(0, len(b.ended_sentences)):
-		    b.ended_sentences_scores[i] += self.mmi_gamma * len(b.ended_sentences[i])
-		    #print "QQQQ\t" + " ".join(self.id2w(b.ended_sentences[i])), b.ended_sentences_scores[i], b.ended_sentences_seq_scores[i], b.ended_sentences_lm_scores[i]
-		# Sort score
-		best_scores, best_scores_id = self.tt.FloatTensor(b.ended_sentences_scores).topk(n_best, 0, True, True)
-		# return n_best 
-	        del hyps[:]; del attn[:]; del scores[:]
-		for i in range(0, min(best_scores.size(0), n_best)):
-		    id = best_scores_id[i]
-		    hyps.append(b.ended_sentences[id])
-		    attn.append(b.ended_sentences_attn[id])
-		    scores.append(b.ended_sentences_scores[id])
-		    
+                score.append(scores[i])
+            if self.mmi:
+                # MMI
+                if len(b.ended_sentences) == 0:
+                    for i, (times, k) in enumerate(ks[:n_best]):
+                        hyp, att = b.get_hyp(times, k)
+                        b.ended_sentences.append(hyp)
+                        b.ended_sentences_attn.append(att)
+                        b.ended_sentences_scores.append(scores[i])
+                for i in range(0, len(b.ended_sentences)):
+                    b.ended_sentences_scores[i] += self.mmi_gamma * len(b.ended_sentences[i])
+                    #print "QQQQ\t" + " ".join(self.id2w(b.ended_sentences[i])), b.ended_sentences_scores[i], b.ended_sentences_seq_scores[i], b.ended_sentences_lm_scores[i]
+                # Sort score
+                best_scores, best_scores_id = self.tt.FloatTensor(b.ended_sentences_scores).topk(n_best, 0, True, True)
+                # return n_best 
+                del hyps[:]; del attn[:]; del scores[:]
+                for i in range(0, min(best_scores.size(0), n_best)):
+                    id = best_scores_id[i]
+                    hyps.append(b.ended_sentences[id])
+                    attn.append(b.ended_sentences_attn[id])
+                    scores.append(b.ended_sentences_scores[id])
+    
             ret["predictions"].append(hyps)
             ret["scores"].append(scores)
             ret["attention"].append(attn)
