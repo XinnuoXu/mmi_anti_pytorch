@@ -22,14 +22,14 @@ class Beam(object):
                  min_length=0):
 
         self.size = size
-	self.cuda = cuda
+        self.cuda = cuda
         self.tt = torch.cuda if cuda else torch
 
         # The score for each translation on the beam.
         self.scores = self.tt.FloatTensor(size).zero_()
         self.all_scores = []
 
-	# MMI: The score for each translation on the beam
+        # MMI: The score for each translation on the beam
         self.seq_scores = self.tt.FloatTensor(size).zero_()
         self.lm_scores = self.tt.FloatTensor(size).zero_()
         self.all_seq_scores = []
@@ -61,12 +61,12 @@ class Beam(object):
         # Minimum prediction length
         self.min_length = min_length
 
-	# Ended sentences
-	self.ended_sentences = []
-	self.ended_sentences_attn = []
-	self.ended_sentences_scores = []
-	self.ended_sentences_seq_scores = []
-	self.ended_sentences_lm_scores = []
+        # Ended sentences
+        self.ended_sentences = []
+        self.ended_sentences_attn = []
+        self.ended_sentences_scores = []
+        self.ended_sentences_seq_scores = []
+        self.ended_sentences_lm_scores = []
 
     def get_current_state(self):
         "Get the outputs for the current timestep."
@@ -78,22 +78,22 @@ class Beam(object):
 
     def get_current_seq(self):
         "Get the predicted string for the current timestep."
-	res = []; res_torch = []
+        res = []; res_torch = []
 
-	if len(self.next_ys) == 1:
-	    return []
+        if len(self.next_ys) == 1:
+            return []
 
-	for k in range(0, self.next_ys[-1].size(0)):
-	    hyp, attn = self.get_hyp(len(self.next_ys), k)
-	    res.append(hyp)
-	mtx = np.array(res).transpose()
+        for k in range(0, self.next_ys[-1].size(0)):
+            hyp, attn = self.get_hyp(len(self.next_ys), k)
+            res.append(hyp)
+        mtx = np.array(res).transpose()
 
-	if self.cuda:
-	    for i in range(0, mtx.shape[0]):
-	        res_torch.append(torch.from_numpy(mtx[i]).cuda())
-	else:
-	    for i in range(0, mtx.shape[0]):
-	        res_torch.append(torch.from_numpy(mtx[i]))
+        if self.cuda:
+            for i in range(0, mtx.shape[0]):
+                res_torch.append(torch.from_numpy(mtx[i]).cuda())
+        else:
+            for i in range(0, mtx.shape[0]):
+                res_torch.append(torch.from_numpy(mtx[i]))
         return res_torch
 
     def advance(self, word_probs, attn_out, mmi=False, seq_score = None, lm_score = None):
@@ -125,67 +125,67 @@ class Beam(object):
                     beam_scores[i] = -1e20
         else:
             beam_scores = word_probs[0]
-	# beam_score = beam_size * vocab_size
+        # beam_score = beam_size * vocab_size
         flat_beam_scores = beam_scores.view(-1)
 
-	if not mmi:
+        if not mmi:
             best_scores, best_scores_id = flat_beam_scores.topk(self.size, 0, True, True)
-	else:
-	    # MMI
+        else:
+            # MMI
 
-	    if len(self.prev_ks) > 0:
-		beam_seq_score = seq_score + self.seq_scores.unsqueeze(1).expand_as(seq_score)
-		beam_lm_score = lm_score + self.lm_scores.unsqueeze(1).expand_as(lm_score)
-	    else:
-		beam_seq_score = seq_score[0]
-		beam_lm_score = lm_score[0]
-	    flat_beam_seq_score = beam_seq_score.view(-1)
-	    flat_beam_lm_score = beam_lm_score.view(-1)
-	
-	    best_scores_beam = []; best_scores_id_beam = []
-	    best_seq_scores_beam = []; best_lm_scores_beam = []
+            if len(self.prev_ks) > 0:
+                beam_seq_score = seq_score + self.seq_scores.unsqueeze(1).expand_as(seq_score)
+                beam_lm_score = lm_score + self.lm_scores.unsqueeze(1).expand_as(lm_score)
+            else:
+                beam_seq_score = seq_score[0]
+                beam_lm_score = lm_score[0]
+            flat_beam_seq_score = beam_seq_score.view(-1)
+            flat_beam_lm_score = beam_lm_score.view(-1)
+        
+            best_scores_beam = []; best_scores_id_beam = []
+            best_seq_scores_beam = []; best_lm_scores_beam = []
             best_scores, best_scores_id = flat_beam_scores.topk(self.size * self.size, 0, True, True)
 
-	    # Save all ended sentences
-	    # Get top_beam_size not ended sentences
-	    prev_k = best_scores_id / num_words
-	    next_ys = best_scores_id - prev_k * num_words
-	    for i in range(next_ys.size(0)):
-		if next_ys[i] == self._eos:
-	    	    # Save all ended sentences
-		    hyp, attn = self.get_hyp(len(self.next_ys), prev_k[i])
-		    if len(hyp) == 0: continue
-		    score = self.global_scorer.score_iter(self, best_scores[i], prev_k[i])
+            # Save all ended sentences
+            # Get top_beam_size not ended sentences
+            prev_k = best_scores_id / num_words
+            next_ys = best_scores_id - prev_k * num_words
+            for i in range(next_ys.size(0)):
+                if next_ys[i] == self._eos:
+                    # Save all ended sentences
+                    hyp, attn = self.get_hyp(len(self.next_ys), prev_k[i])
+                    if len(hyp) == 0: continue
+                    score = self.global_scorer.score_iter(self, best_scores[i], prev_k[i])
 
-		    score_seq = self.global_scorer.score_iter(self, flat_beam_seq_score[best_scores_id[i]], prev_k[i])
-		    score_lm = self.global_scorer.score_iter(self, flat_beam_lm_score[best_scores_id[i]], prev_k[i])
-	
-		    self.ended_sentences.append(hyp)
-		    self.ended_sentences_scores.append(score)
-		    self.ended_sentences_seq_scores.append(score_seq)
-		    self.ended_sentences_lm_scores.append(score_lm)
-		    self.ended_sentences_attn.append(attn)
-		elif len(best_scores_beam) < self.size:
-	    	    # Get top_beam_size not ended sentences
-		    best_scores_beam.append(best_scores[i])
-		    best_scores_id_beam.append(best_scores_id[i])
-		    best_seq_scores_beam.append(flat_beam_seq_score[best_scores_id[i]])
-		    best_lm_scores_beam.append(flat_beam_lm_score[best_scores_id[i]])
-		
-		    # Debug
-		    hyp, attn = self.get_hyp(len(self.next_ys), prev_k[i])
-		    hyp.append(next_ys[i])
-		    #print hyp, best_scores[i], flat_beam_seq_score[best_scores_id[i]], flat_beam_lm_score[best_scores_id[i]]
+                    score_seq = self.global_scorer.score_iter(self, flat_beam_seq_score[best_scores_id[i]], prev_k[i])
+                    score_lm = self.global_scorer.score_iter(self, flat_beam_lm_score[best_scores_id[i]], prev_k[i])
+        
+                    self.ended_sentences.append(hyp)
+                    self.ended_sentences_scores.append(score)
+                    self.ended_sentences_seq_scores.append(score_seq)
+                    self.ended_sentences_lm_scores.append(score_lm)
+                    self.ended_sentences_attn.append(attn)
+                elif len(best_scores_beam) < self.size:
+                    # Get top_beam_size not ended sentences
+                    best_scores_beam.append(best_scores[i])
+                    best_scores_id_beam.append(best_scores_id[i])
+                    best_seq_scores_beam.append(flat_beam_seq_score[best_scores_id[i]])
+                    best_lm_scores_beam.append(flat_beam_lm_score[best_scores_id[i]])
+                
+                    # Debug
+                    hyp, attn = self.get_hyp(len(self.next_ys), prev_k[i])
+                    hyp.append(next_ys[i])
+                    #print hyp, best_scores[i], flat_beam_seq_score[best_scores_id[i]], flat_beam_lm_score[best_scores_id[i]]
 
-	    best_scores = self.tt.FloatTensor(best_scores_beam)
-	    best_scores_id = self.tt.LongTensor(best_scores_id_beam)
-	    best_seq_scores = self.tt.FloatTensor(best_seq_scores_beam)
-	    best_lm_scores = self.tt.FloatTensor(best_lm_scores_beam)
+            best_scores = self.tt.FloatTensor(best_scores_beam)
+            best_scores_id = self.tt.LongTensor(best_scores_id_beam)
+            best_seq_scores = self.tt.FloatTensor(best_seq_scores_beam)
+            best_lm_scores = self.tt.FloatTensor(best_lm_scores_beam)
 
             self.all_seq_scores.append(self.seq_scores)
             self.all_lm_scores.append(self.lm_scores)
-	    self.seq_scores = best_seq_scores
-	    self.lm_scores = best_lm_scores
+            self.seq_scores = best_seq_scores
+            self.lm_scores = best_lm_scores
 
         self.all_scores.append(self.scores)
         self.scores = best_scores
@@ -226,7 +226,7 @@ class Beam(object):
                     global_scores = self.global_scorer.score(self, self.scores)
                     s = global_scores[i]
                 self.finished.append((s, len(self.next_ys) - 1, i))
-		# should be i += 1???
+        # should be i += 1???
 
         self.finished.sort(key=lambda a: -a[0])
         scores = [sc for sc, _, _ in self.finished]
@@ -242,10 +242,10 @@ class Beam(object):
             hyp.append(self.next_ys[j+1][k])
             attn.append(self.attn[j][k])
             k = self.prev_ks[j][k]
-	if len(hyp) > 0:
+        if len(hyp) > 0:
             return hyp[::-1], torch.stack(attn[::-1])
-	else:
-	    return hyp, attn
+        else:
+            return hyp, attn
 
 
 class GNMTGlobalScorer(object):
